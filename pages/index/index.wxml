@@ -1,0 +1,60 @@
+<view class="app-shell">
+  <canvas type="2d" id="gameCanvas" class="game-canvas {{screen === 'game' ? '' : 'canvas-hidden'}}"></canvas>
+
+  <view wx:if="{{screen === 'menu'}}" class="menu-screen">
+    <image class="menu-bg" src="/assets/lobby.jpg" mode="aspectFill" />
+    <view class="menu-shade"></view>
+    <view class="menu-header safe-top">
+      <view><text class="eyebrow">生存割草 · 微信小程序原型</text><text class="game-title">废墟守望</text><text class="tagline">走位 · 成长 · 构筑 · 生存</text></view>
+      <view class="wallet"><image src="/assets/pickup-coin.png" />{{meta.coins}}</view>
+    </view>
+    <view class="menu-body">
+      <view class="role-area">
+        <text class="section-title">选择幸存者</text>
+        <view class="role-list">
+          <view wx:for="{{characters}}" wx:key="id" data-id="{{item.id}}" bindtap="selectCharacter" class="role-card {{item.selected ? 'selected' : ''}} {{item.unlocked ? '' : 'locked'}}">
+            <image src="{{item.portrait}}" mode="aspectFill" />
+            <view class="role-copy"><text class="role-name">{{item.name}}</text><text class="role-type">{{item.unlocked ? item.role : item.unlockText}}</text><text class="role-trait">{{item.unlocked ? item.trait : '尚未解锁'}}</text></view>
+          </view>
+        </view>
+        <view class="menu-actions"><button class="gold-button" bindtap="startGame">{{hasSnapshot ? '继续上局' : '开始游戏'}}</button><button class="steel-button" bindtap="openTalent">通用天赋</button><button class="steel-button" bindtap="openSettings">设置</button></view>
+      </view>
+      <view class="map-panel metal-panel"><text class="section-title">废墟平原</text><view class="map-image"><image src="/assets/title.jpg" mode="aspectFill" /><view class="map-badge">15 分钟</view></view><text class="map-copy">敌群将随时间持续增强。5 分钟出现精英，10 分钟首领入场，15 分钟击败最终首领即可通关，之后可踏入无尽轮回。</text><view class="map-stats"><text>单人</text><text>离线可用</text><text>自动攻击</text><text wx:if="{{meta.bestEndlessCycle > 0}}">无尽最佳 第{{meta.bestEndlessCycle}}层</text></view></view>
+    </view>
+  </view>
+
+  <view wx:if="{{screen === 'game'}}" class="hud safe-top">
+    <view class="vignette"></view>
+    <view class="player-panel metal-panel">
+      <image class="hud-portrait" src="{{currentCharacter.portrait}}" mode="aspectFill" />
+      <view class="vitals"><view class="identity"><text>{{currentCharacter.name}}</text><text>LV {{hud.levelText}}</text></view><view class="meter-row"><text>生命</text><view class="meter hp-track"><view class="fill hp-fill" style="width:{{hud.hpPercent}}%"></view></view><text>{{hud.hpText}}</text></view><view class="meter-row"><text>经验</text><view class="meter xp-track"><view class="fill xp-fill" style="width:{{hud.xpPercent}}%"></view></view></view></view>
+    </view>
+    <view class="time-panel metal-panel"><text class="chapter">{{hud.chapter}}</text><text class="timer">{{hud.time}}</text><text class="objective">{{hud.objective}}</text><text wx:if="{{hud.hordeVisible}}" class="horde-alert">{{hud.hordeText}}</text><view wx:if="{{hud.bossVisible}}" class="boss-meter"><text>{{hud.bossName}}</text><view class="meter"><view class="fill boss-fill" style="width:{{hud.bossPercent}}%"></view></view></view></view>
+    <view class="right-panel metal-panel" style="top:{{ui.rightTop}}px;right:{{ui.rightGap}}px"><view class="coin"><image src="/assets/pickup-coin.png" />{{hud.coins}}</view><button class="pause-button" bindtap="pauseGame">Ⅱ</button></view>
+    <view class="build-panel metal-panel"><text>当前构筑</text><view class="build-grid"><view wx:for="{{hud.weaponList}}" wx:key="id" class="build-slot {{item.evolved ? 'evolved' : ''}}"><image src="{{item.icon}}" /><text>{{item.level}}</text></view></view><view class="build-grid passive-grid"><view wx:for="{{hud.passiveList}}" wx:key="id" class="build-slot"><image src="{{item.icon}}" /><text>{{item.level}}</text></view></view></view>
+    <view class="joystick" catchtouchstart="joystickStart" catchtouchmove="joystickMove" catchtouchend="joystickEnd" catchtouchcancel="joystickEnd"><view class="joystick-lines"></view><view class="stick" style="transform:translate({{stick.x}}px,{{stick.y}}px)"></view></view>
+    <view wx:if="{{toast}}" class="toast">◆　{{toast}}　◆</view>
+  </view>
+
+  <view wx:if="{{modal.type}}" class="modal-mask">
+    <view class="modal metal-panel {{modal.type}}-modal">
+      <text class="modal-title">{{modal.title}}</text><text wx:if="{{modal.subtitle}}" class="modal-subtitle">{{modal.subtitle}}</text>
+      <view wx:if="{{modal.type === 'level'}}" class="choice-list"><view wx:for="{{modal.choices}}" wx:key="key" data-index="{{index}}" bindtap="chooseUpgrade" class="choice-card"><image src="{{item.icon}}" /><text class="choice-name">{{item.name}}</text><text class="choice-level">{{item.levelText}}</text><text class="choice-desc">{{item.text}}</text><text class="choice-tag">{{item.tag}}</text></view></view>
+      <view wx:if="{{modal.type === 'pause'}}" class="pause-content"><view class="run-summary"><text>存活 <text class="strong">{{hud.time}}</text></text><text>击败 <text class="strong">{{hud.kills}}</text></text></view><view class="pause-build"><view wx:for="{{hud.weaponList}}" wx:key="id"><image src="{{item.icon}}" /><text>{{item.name}} Lv{{item.level}}</text></view></view></view>
+      <view wx:if="{{modal.type === 'endless'}}" class="endless-content"><view><text>轮回节奏</text><text class="endless-value">每 2.5 分钟一层</text></view><view><text>敌人成长</text><text class="endless-value">逐层增强 · 无上限</text></view><view><text>首领奖励</text><text class="endless-value">宝箱 · 回血 · 金币</text></view></view>
+      <view wx:if="{{modal.type === 'result'}}" class="result-grid {{modal.endlessCycle ? 'four' : ''}}"><view><text>存活时间</text><text class="result-value">{{modal.time}}</text></view><view><text>击败敌人</text><text class="result-value">{{modal.kills}}</text></view><view><text>获得金币</text><text class="result-value">+{{modal.coins}}</text></view><view wx:if="{{modal.endlessCycle}}"><text>无尽层数</text><text class="result-value">{{modal.endlessCycle}}</text></view></view>
+      <view wx:if="{{modal.type === 'chest'}}" class="reward"><image src="{{modal.icon}}" /><text class="reward-name">{{modal.rewardName}}</text><text>{{modal.rewardText}}</text></view>
+      <view wx:if="{{modal.type === 'talent'}}" class="talent-list"><view wx:for="{{modal.talents}}" wx:key="id" data-id="{{item.id}}" bindtap="buyTalent" class="talent-node {{item.disabled ? 'disabled' : ''}}"><text>{{item.name}}</text><text class="talent-level">Lv {{item.level}}/5</text><text class="talent-cost">{{item.costText}}</text></view></view>
+      <view wx:if="{{modal.type === 'settings'}}" class="settings-list"><view><text>触感反馈</text><switch checked="{{settings.sound}}" bindchange="toggleSound" color="#67cfff" /></view><view><text>低画质模式</text><switch checked="{{settings.lowQuality}}" bindchange="toggleQuality" color="#67cfff" /></view><view><text>重置新手提示</text><button class="small-button" bindtap="resetTutorial">重置</button></view></view>
+      <view class="modal-actions">
+        <button wx:if="{{modal.type === 'level'}}" class="steel-button" bindtap="reroll" disabled="{{rerolls === 0}}">刷新选择 {{rerolls}}</button>
+        <button wx:if="{{modal.type === 'pause'}}" class="gold-button" bindtap="resumeGame">继续游戏</button><button wx:if="{{modal.type === 'pause'}}" class="steel-button" bindtap="openSettings">设置</button><button wx:if="{{modal.type === 'pause'}}" class="danger-button" bindtap="quitGame">结束对局</button>
+        <button wx:if="{{modal.type === 'endless'}}" class="gold-button" bindtap="continueEndless">踏入无尽轮回</button><button wx:if="{{modal.type === 'endless'}}" class="steel-button" bindtap="claimVictory">领取胜利结算</button>
+        <button wx:if="{{modal.type === 'chest'}}" class="gold-button" bindtap="closeReward">继续战斗</button>
+        <button wx:if="{{modal.type === 'result'}}" class="gold-button" bindtap="retryGame">再来一局</button><button wx:if="{{modal.type === 'result'}}" class="steel-button" bindtap="backToMenu">返回大厅</button>
+        <button wx:if="{{modal.type === 'talent'}}" class="steel-button" bindtap="resetTalents">免费重置</button><button wx:if="{{modal.type === 'talent'}}" class="gold-button" bindtap="closeModal">返回大厅</button>
+        <button wx:if="{{modal.type === 'settings'}}" class="gold-button" bindtap="closeSettings">返回</button>
+      </view>
+    </view>
+  </view>
+</view>

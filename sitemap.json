@@ -1,0 +1,4 @@
+{
+  "desc": "游戏主页面允许被索引",
+  "rules": [{ "action": "allow", "page": "pages/index/index" }]
+}

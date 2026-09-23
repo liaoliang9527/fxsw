@@ -1,0 +1,27 @@
+{
+  "description": "废墟守望 生存割草微信小程序原型",
+  "packOptions": {
+    "ignore": [
+      {
+        "type": "file",
+        "value": "README.md"
+      }
+    ],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "compileHotReLoad": true,
+    "useCompilerPlugins": false
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.6.8",
+  "appid": "wxb73d4be1a9bca4c6",
+  "projectname": "废墟守望微信小程序",
+  "condition": {},
+  "isGameTourist": false
+}
