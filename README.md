@@ -49,7 +49,7 @@
 
 - `pages/index/`：大厅、HUD、弹窗和 Canvas 战斗逻辑
 - `utils/config.js`：角色、武器、被动、敌人与关卡参数
-- `assets/`：压缩后的角色立绘、武器、被动和掉落物图片
+- 远程资源：角色立绘、武器、被动和掉落物图片统一从 `http://oss.zyg8.top/game/assets/` 加载
 - `project.config.json`：微信开发者工具项目配置
 
 ## 当前版本说明
