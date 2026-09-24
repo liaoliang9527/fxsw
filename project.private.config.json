@@ -3,7 +3,7 @@
   "projectname": "%E5%BA%9F%E5%A2%9F%E5%AE%88%E6%9C%9B%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F",
   "condition": {},
   "setting": {
-    "urlCheck": false,
+    "urlCheck": true,
     "coverView": false,
     "lazyloadPlaceholderEnable": false,
     "skylineRenderEnable": false,
